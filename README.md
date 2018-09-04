@@ -90,6 +90,18 @@ The following reveal the bitmap in its correct orientation and given width / hei
 ![](https://www.studytonight.com/android/images/toast-in-android-4.jpg)  
 As I mentioned in [Xamarin iOS](https://github.com/chien1219/Xamarin-iOS), the way to implement toast on Android is more simple.  
   
+The Interface in Xamarin.Form:  
+```
+namespace MyProject.Interface
+{
+    public interface IToastHelper
+    {
+        void LongAlert(string message);
+        void ShortAlert(string message);
+    }
+}
+```
+Dependency Service on Droid:  
 ```
 using Android.Widget;
 using MyProject.Droid.DependencyService;
