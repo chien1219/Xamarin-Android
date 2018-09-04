@@ -83,4 +83,41 @@ The following reveal the bitmap in its correct orientation and given width / hei
 
     return resizedImage;
 }
+```  
+  
+  
+## Toast  
+As I mentioned in [Xamarin iOS](https://github.com/chien1219/Xamarin-iOS), the way to implement toast on Android is more simple.  
+  
 ```
+using Android.Widget;
+using MyProject.Droid.DependencyService;
+using MyProject.Interface;
+
+[assembly: Xamarin.Forms.Dependency(typeof(ToastHelperService))]
+namespace MyProject.Droid.DependencyService
+{
+    public class ToastHelperService : IToastHelper
+    {
+        double screenHeight = Plugin.XamJam.Screen.CrossScreen.Current.Size.Height * 0.8;
+        Toast toast = new Toast(Android.App.Application.Context);
+
+        public void LongAlert(string message)
+        {
+            toast.Cancel();
+            toast = Toast.MakeText(Android.App.Application.Context, message, ToastLength.Long);
+            toast.SetGravity(Android.Views.GravityFlags.Bottom, 0, (int)screenHeight);
+            toast.Show();
+        }
+        public void ShortAlert(string message)
+        {
+            toast.Cancel();
+            toast = Toast.MakeText(Android.App.Application.Context, message, ToastLength.Short);
+            toast.SetGravity(Android.Views.GravityFlags.Bottom, 0, (int)screenHeight);
+            toast.Show();
+        }
+    }
+}
+```  
+The code above is to show a toast message on the 1/5 place of the screen from bottom (using toast.SetGravity()).  
+Toast is already implemented in Android.Widget well and customized, the reason I called Cancel() before show is to prevent from double-clicked or multi-clicked, thus, it work as desired!
