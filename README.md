@@ -87,7 +87,7 @@ The following reveal the bitmap in its correct orientation and given width / hei
   
   
 ## Toast Effect  
-![Toast](https://az787680.vo.msecnd.net/user/law1009/1201/2012111859437.png)  
+![](https://www.studytonight.com/android/images/toast-in-android-4.jpg)  
 As I mentioned in [Xamarin iOS](https://github.com/chien1219/Xamarin-iOS), the way to implement toast on Android is more simple.  
   
 ```
