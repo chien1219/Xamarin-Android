@@ -197,9 +197,6 @@ namespace MyProject.Droid.Renderers
                     return;
                 }
 
-		// Set selected tab tint color
-                _bottomNavigationView.Menu.GetItem(0).Icon.SetColorFilter(Android.Graphics.Color.DodgerBlue, Android.Graphics.PorterDuff.Mode.Multiply);
-
                 for (var i = 0; i < _bottomNavigationView.Menu.Size(); i++)
                 {
                     AddTabBadge(i);
@@ -207,7 +204,7 @@ namespace MyProject.Droid.Renderers
             }
         }
 
-        private void AddTabBadge(int tabIndex)
+	private void AddTabBadge(int tabIndex)
         {
             var element = Element.Children[tabIndex];
             BadgeView badgeView = null;
@@ -228,8 +225,11 @@ namespace MyProject.Droid.Renderers
                 
                 //create badge for tab
                 badgeView = new BadgeView(Context, badgeTarget);
-                badgeView.SetMaxWidth(45);
-                badgeView.SetMaxHeight(45);
+                
+                badgeView.SetMinimumHeight(35);
+                badgeView.SetMinimumWidth(35);
+                badgeView.TranslationY = 20;
+                badgeView.SetTextSize(Android.Util.ComplexUnitType.Dip, 5);
             }
 
             BadgeViews[element] = badgeView;
@@ -277,36 +277,8 @@ namespace MyProject.Droid.Renderers
 	
         bool BottomNavigationView.IOnNavigationItemSelectedListener.OnNavigationItemSelected(IMenuItem item)
         {
-            if (Element is MainBottomTabbedPage)
-            {
-                for (var i = 0; i < _bottomNavigationView.Menu.Size(); i++)
-                {
-                    _bottomNavigationView.Menu.GetItem(i).Icon.SetColorFilter(Android.Graphics.Color.White, Android.Graphics.PorterDuff.Mode.Multiply);
-                }
-                item.Icon.SetColorFilter(Android.Graphics.Color.DodgerBlue, Android.Graphics.PorterDuff.Mode.Multiply);
-            }
             return base.OnNavigationItemSelected(item);
         }        
-    }
-
-    public class NoAnimationPageTransformer : Java.Lang.Object, ViewPager.IPageTransformer
-    {
-        public void TransformPage(Android.Views.View view, float position)
-        {
-            if (position < 0)
-            {
-                view.ScrollX = (int)((float)(view.Width) * position);
-            }
-            else if (position > 0)
-            {
-                view.ScrollX = -(int)((float)(view.Width) * -position);
-            }
-            else
-            {
-                view.ScrollX = 0;
-            }
-
-        }
     }
 }
   ```
