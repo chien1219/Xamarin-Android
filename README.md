@@ -167,8 +167,12 @@ namespace MyProject.Droid.Renderers
 
             base.OnElementChanged(e);
 
-            ViewPager _viewPager = null;
+            // make sure we cleanup old event registrations
+            Cleanup(e.OldElement);
+            Cleanup(Element);
 
+            ViewPager _viewPager = null;
+            
             var view = ((ViewGroup)GetChildAt(0));
 
             for (int i = 0; i < view.ChildCount; i++)
@@ -183,10 +187,7 @@ namespace MyProject.Droid.Renderers
             {
                 _viewPager.SetPageTransformer(true, new NoAnimationPageTransformer());
             }
-
-            Cleanup(e.OldElement);
-            Cleanup(Element);
-
+            
             if (IsBottomTabPlacement)
             {
                 _bottomNavigationView = ViewGroup.FindChildOfType<BottomNavigationView>();
@@ -196,11 +197,14 @@ namespace MyProject.Droid.Renderers
                     return;
                 }
 
+		// Set selected tab tint color
+                _bottomNavigationView.Menu.GetItem(0).Icon.SetColorFilter(Android.Graphics.Color.DodgerBlue, Android.Graphics.PorterDuff.Mode.Multiply);
+
                 for (var i = 0; i < _bottomNavigationView.Menu.Size(); i++)
                 {
                     AddTabBadge(i);
                 }
-            }            
+            }
         }
 
         private void AddTabBadge(int tabIndex)
@@ -221,7 +225,7 @@ namespace MyProject.Droid.Renderers
                 var badgeTarget = imageView?.Drawable != null
                     ? (Android.Views.View)imageView
                     : (view as ViewGroup)?.FindChildOfType<TextView>();
-
+                
                 //create badge for tab
                 badgeView = new BadgeView(Context, badgeTarget);
                 badgeView.SetMaxWidth(45);
@@ -229,9 +233,9 @@ namespace MyProject.Droid.Renderers
             }
 
             BadgeViews[element] = badgeView;
-
+            
             badgeView.UpdateFromElement(element);
-
+        
             element.PropertyChanged -= OnTabbedPagePropertyChanged;
             element.PropertyChanged += OnTabbedPagePropertyChanged;
         }
@@ -239,7 +243,9 @@ namespace MyProject.Droid.Renderers
         protected virtual void OnTabbedPagePropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             if (!(sender is Element element))
+            {
                 return;
+            }
 
             if (BadgeViews.TryGetValue(element, out var badgeView))
             {
@@ -268,73 +274,21 @@ namespace MyProject.Droid.Renderers
             
             BadgeViews.Clear();
         }
-        
-        void BottomNavigationView.IOnNavigationItemReselectedListener.OnNavigationItemReselected(IMenuItem item)
-        {
-            if (Element is MainBottomTabbedPage)
-            {
-
-            }
-        }
-
+	
         bool BottomNavigationView.IOnNavigationItemSelectedListener.OnNavigationItemSelected(IMenuItem item)
         {
-            base.OnNavigationItemSelected(item);
-
             if (Element is MainBottomTabbedPage)
             {
-
-            }
-            return true;
-        }
-
-        protected override void OnLayout(bool changed, int l, int t, int r, int b)
-        {
-            base.OnLayout(changed, l, t, r, b);
-            try
-            {
-                if (!_isShiftModeSet)
+                for (var i = 0; i < _bottomNavigationView.Menu.Size(); i++)
                 {
-                    var children = GetAllChildViews(ViewGroup);
-
-                    if (children.SingleOrDefault(x => x is BottomNavigationView) is BottomNavigationView bottomNav)
-                    {
-                        bottomNav.SetShiftMode(false, false);
-                        _isShiftModeSet = true;
-                    }
+                    _bottomNavigationView.Menu.GetItem(i).Icon.SetColorFilter(Android.Graphics.Color.White, Android.Graphics.PorterDuff.Mode.Multiply);
                 }
+                item.Icon.SetColorFilter(Android.Graphics.Color.DodgerBlue, Android.Graphics.PorterDuff.Mode.Multiply);
             }
-            catch (Exception e)
-            {
-                Console.WriteLine($"Error setting ShiftMode: {e}");
-            }
-        }
-
-        private List<Android.Views.View> GetAllChildViews(Android.Views.View view)
-        {
-            if (!(view is ViewGroup group))
-            {
-                return new List<Android.Views.View> { view };
-            }
-
-            var result = new List<Android.Views.View>();
-
-            for (int i = 0; i < group.ChildCount; i++)
-            {
-                var child = group.GetChildAt(i);
-
-                var childList = new List<Android.Views.View> { child };
-                childList.AddRange(GetAllChildViews(child));
-
-                result.AddRange(childList);
-            }
-
-            return result.Distinct().ToList();
-        }
-        
+            return base.OnNavigationItemSelected(item);
+        }        
     }
-    
-    // To cancel the animation of the tab when selected.
+
     public class NoAnimationPageTransformer : Java.Lang.Object, ViewPager.IPageTransformer
     {
         public void TransformPage(Android.Views.View view, float position)
@@ -351,6 +305,7 @@ namespace MyProject.Droid.Renderers
             {
                 view.ScrollX = 0;
             }
+
         }
     }
 }
