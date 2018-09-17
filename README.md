@@ -423,3 +423,6 @@ namespace Plugin.Badge.Droid
   
   But this is more complicated and also come out with tint problem on Android (which means that the icon will not be shown as original color but tint one.)  
   
+### 2018/9/17 Update
+  **xabre** has update solution to bottom tabpage for Android.  
+  
