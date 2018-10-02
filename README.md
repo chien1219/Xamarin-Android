@@ -336,12 +336,12 @@ namespace MyProject.Droid.Renderers
   	base.ViewWillAppear(animated);
   	foreach (UITabBarItem item in TabBar.Items)
   	{
-	    //This line is in order to dismiss the label text.
-  	    item.ImageInsets = new UIEdgeInsets(top: 6, left: 0, bottom: -6, right: 0);
-  	    //Change image
-	    item.Image = new UIImage("Image.png");
-	    //Keep original color without tint
-	    item.Image = item.Image.ImageWithRenderingMode(UIKit.UIImageRenderingMode.AlwaysOriginal);
+			//This line is in order to dismiss the label text.
+			item.ImageInsets = new UIEdgeInsets(top: 6, left: 0, bottom: -6, right: 0);
+			//Change image
+			item.Image = new UIImage("Image.png");
+			//Keep original color without tint
+			item.Image = item.Image.ImageWithRenderingMode(UIKit.UIImageRenderingMode.AlwaysOriginal);
   	}
   }
   ```  
