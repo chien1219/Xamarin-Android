@@ -148,7 +148,7 @@ Toast is already implemented in Android.Widget well and customized, the reason I
 [assembly: ExportRenderer(typeof(MainBottomTabbedPage), typeof(MyTabBarRenderer))]
 namespace MyProject.Droid.Renderers
 {
-    public class MyTabBarRenderer : BadgedTabbedPageRenderer, BottomNavigationView.IOnNavigationItemReselectedListener, BottomNavigationView.IOnNavigationItemSelectedListener
+    public class MyTabBarRenderer : TabbedPageRenderer, BottomNavigationView.IOnNavigationItemReselectedListener, BottomNavigationView.IOnNavigationItemSelectedListener
     {
         private bool _isShiftModeSet = false;
         
@@ -157,37 +157,10 @@ namespace MyProject.Droid.Renderers
         
         private BottomNavigationView _bottomNavigationView;
 
-        public MyTabBarRenderer(Context context) : base(context)
-        {
-        }
+        public MyTabBarRenderer(Context context) : base(context){}
 
         protected override void OnElementChanged(ElementChangedEventArgs<TabbedPage> e)
         {
-            // make sure we cleanup old event registrations
-
-            base.OnElementChanged(e);
-
-            // make sure we cleanup old event registrations
-            Cleanup(e.OldElement);
-            Cleanup(Element);
-
-            ViewPager _viewPager = null;
-            
-            var view = ((ViewGroup)GetChildAt(0));
-
-            for (int i = 0; i < view.ChildCount; i++)
-            {
-                var v = view.GetChildAt(i);
-
-                if (v is ViewPager)
-                    _viewPager = (ViewPager)v;
-            }
-
-            if (_viewPager != null)
-            {
-                _viewPager.SetPageTransformer(true, new NoAnimationPageTransformer());
-            }
-            
             if (IsBottomTabPlacement)
             {
                 _bottomNavigationView = ViewGroup.FindChildOfType<BottomNavigationView>();
@@ -226,6 +199,7 @@ namespace MyProject.Droid.Renderers
                 //create badge for tab
                 badgeView = new BadgeView(Context, badgeTarget);
                 
+		// Fix the size and optimize
                 badgeView.SetMinimumHeight(35);
                 badgeView.SetMinimumWidth(35);
                 badgeView.TranslationY = 20;
@@ -252,46 +226,15 @@ namespace MyProject.Droid.Renderers
                 badgeView.UpdateFromPropertyChangedEvent(element, e);
             }
         }
-        
-        protected override void Dispose(bool disposing)
-        {
-            Cleanup(Element);
-
-            base.Dispose(disposing);
-        }
-
-        private void Cleanup(TabbedPage page)
-        {
-            if (page == null)
-            {
-                return;
-            }
-
-            foreach (var tab in page.Children)
-            {
-                tab.PropertyChanged -= OnTabbedPagePropertyChanged;
-            }
-            
-            BadgeViews.Clear();
-        }
-	
-        bool BottomNavigationView.IOnNavigationItemSelectedListener.OnNavigationItemSelected(IMenuItem item)
-        {
-            return base.OnNavigationItemSelected(item);
-        }        
     }
 }
   ```
   
-  And for the extension(if we override those function in our render, the original extension of plug in won't be accessible)
-  we create our own:  
+  And for the extension(if we override those function in our renderer, the original extension of plugin won't be accessible)
+  we add there lines followed by AddBadge():  
   
   ```
-namespace Plugin.Badge.Droid
-{
-    internal static class BadgeViewExtensions
-    {
-        public static void UpdateFromElement(this BadgeView badgeView, Page element)
+        public void UpdateFromElement(BadgeView badgeView, Page element)
         {
             //get text
             var badgeText = TabBadge.GetBadgeText(element);
@@ -325,7 +268,7 @@ namespace Plugin.Badge.Droid
             badgeView.Postion = TabBadge.GetBadgePosition(element);
         }
 
-        public static void UpdateFromPropertyChangedEvent(this BadgeView badgeView, Element element, PropertyChangedEventArgs e)
+        public void UpdateFromPropertyChangedEvent(BadgeView badgeView, Element element, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == TabBadge.BadgeTextProperty.PropertyName)
             {
@@ -364,39 +307,21 @@ namespace Plugin.Badge.Droid
                 return;
             }
         }
-
-        public static T FindChildOfType<T>(this ViewGroup parent) where T : View
+  ```  
+  In order to tine the icon (if you custom your renderer or inherent from **BadgedTabbedPageRenderer**, it is possible to lose your tint when selected):  
+  ```
+   bool BottomNavigationView.IOnNavigationItemSelectedListener.OnNavigationItemSelected(IMenuItem item)
         {
-            if (parent == null)
-                return null;
-
-            if (parent.ChildCount == 0)
-                return null;
-
-            for (var i = 0; i < parent.ChildCount; i++)
+            if (Element is MainBottomTabbedPage)
             {
-                var child = parent.GetChildAt(i);
-
-
-                var typedChild = child as T;
-                if (typedChild != null)
+                for (var i = 0; i < _bottomNavigationView.Menu.Size(); i++)
                 {
-                    return typedChild;
+                    _bottomNavigationView.Menu.GetItem(i).Icon.SetColorFilter(Android.Graphics.Color.White, Android.Graphics.PorterDuff.Mode.Multiply);
                 }
-
-                if (!(child is ViewGroup))
-                    continue;
-
-
-                var result = FindChildOfType<T>(child as ViewGroup);
-                if (result != null)
-                    return result;
+                item.Icon.SetColorFilter(Android.Graphics.Color.DodgerBlue, Android.Graphics.PorterDuff.Mode.Multiply);
             }
-
-            return null;
+             return base.OnNavigationItemSelected(item);
         }
-    }
-}
   ```
   
   There are also many ways to handle Tab Badge, such as:  
@@ -425,4 +350,5 @@ namespace Plugin.Badge.Droid
   
 ### 2018/9/17 Update
   **xabre** has update solution to bottom tabpage for Android.  
+  But there are still some problem with it, for example, it could not render with custom renderer.  
   
