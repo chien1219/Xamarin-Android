@@ -351,4 +351,25 @@ namespace MyProject.Droid.Renderers
 ### 2018/9/17 Update
   **xabre** has update solution to bottom tabpage for Android.  
   But there are still some problem with it, for example, it could not render with custom renderer.  
+    
+  ## Wrapped animation: Image scale while translating  
+  The original [Simple animation](https://docs.microsoft.com/xamarin/xamarin-forms/user-interface/animation/simple) that Xamarin support for ViewExtension are limited  
+  Only **ScaleTo**, **TranslateTo** supported, what if we want to do both at the same time?  
+  We can wrap both in an single anamation.  
+  Also, The XF only provides scale, instead of scaleX and scaleY seperately.  
+  As what I'll show next, is to animate a content view from customized-original size to customized-desired size by changing height and widthrequest.  
+  For Following codes, in which **v** stands for scale factor during animation and **offset** is set to the difference between original and desired.  
+  It scales from originalScale to scale
+```  
+Animation animation = new Animation(callback: v =>
+    {
+        imageView.HeightRequest = originalHeight + offsetH * v;
+        imageView.WidthRequest = originalWidth + offsetW * v;
+        imageView.TranslationX = offsetX * v;
+        imageView.TranslationY = offsetY * v;
+    } , start: originalScale, end: scale);
+
+animation.Commit(this, "ImageScaleAnimation", 16, 150, Easing.Linear, (v, c) => lastScale = scale);
+```  
+  For the [Commit](https://docs.microsoft.com/en-us/dotnet/api/xamarin.forms.animation.commit?view=xamarin-forms) method, it gives the speed and lasting time of the animation that you can customize yourself.
   
